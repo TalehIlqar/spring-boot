@@ -1,0 +1,7 @@
+com/example/App.class
+com/example/myproject/controller/AdminController.class
+com/example/myproject/config/WebSecurityConfig.class
+com/example/myproject/repository/UserRepository.class
+com/example/myproject/config/DataInitializer.class
+com/example/myproject/model/AppUser.class
+com/example/myproject/MyProjectApplication.class
