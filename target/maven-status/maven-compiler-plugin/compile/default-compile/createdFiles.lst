@@ -1,5 +1,9 @@
 com/example/App.class
+com/example/myproject/controller/UserController.class
 com/example/myproject/controller/AdminController.class
+com/example/myproject/HomeController.class
+com/example/myproject/service/UserDetailsServiceImpl.class
+com/example/myproject/controller/RegisterController.class
 com/example/myproject/config/WebSecurityConfig.class
 com/example/myproject/repository/UserRepository.class
 com/example/myproject/config/DataInitializer.class

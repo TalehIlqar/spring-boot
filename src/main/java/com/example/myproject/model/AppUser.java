@@ -1,9 +1,14 @@
 package com.example.myproject.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 @Entity(name = "app_user")
 public class AppUser {
@@ -12,8 +17,19 @@ public class AppUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
+    @Size(min = 4, max = 50)
+    @Column(nullable = false, unique = true)
     private String username;
+
+    @NotBlank
+    @Size(min = 8)
+    @Column(nullable = false)
     private String password;
+
+    @NotBlank
+    @Email
+    @Column(nullable = false, unique = true)
     private String email;
 
     // Getters and Setters

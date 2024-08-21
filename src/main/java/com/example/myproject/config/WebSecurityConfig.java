@@ -1,36 +1,37 @@
 package com.example.myproject.config;
 
+import com.example.myproject.model.AppUser;
+import com.example.myproject.repository.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+import java.util.ArrayList;
 
 @Configuration
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeRequests(authorizeRequests ->
-                authorizeRequests
-                    .antMatchers("/admin").authenticated()
-                    .anyRequest().permitAll()
-            )
-            .formLogin(formLogin ->
-                formLogin
-                    .defaultSuccessUrl("/admin", true)
-            )
-            .logout(logout ->
-                logout.permitAll()
-            );
+    private final UserRepository userRepository;
 
-        return http.build();
+    public WebSecurityConfig(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> {
+            AppUser user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+            return new User(user.getUsername(), user.getPassword(), new ArrayList<>());
+        };
     }
 
     @Bean
@@ -39,12 +40,30 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("admin")
-            .password(passwordEncoder().encode("admin123"))
-            .roles("ADMIN")
-            .build();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
 
-        return new InMemoryUserDetailsManager(user);
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/home", "/register", "/login", "/css/**", "/js/**").permitAll()
+                .anyRequest().authenticated()
+            )
+            .formLogin(form -> form
+                .loginPage("/login")
+                .defaultSuccessUrl("/dashboard", true)
+                .failureUrl("/login?error=true")
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login")
+                .permitAll()
+            );
+
+        return http.build();
     }
 }
